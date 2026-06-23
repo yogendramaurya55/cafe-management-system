@@ -3,6 +3,8 @@ package com.project.cafe.utils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.project.cafe.enums.Role;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -15,5 +17,7 @@ public class CafeUtils {
 				.status(httpStatus)
 				.body(responseBody);
 	}
+	
+	
 
 }

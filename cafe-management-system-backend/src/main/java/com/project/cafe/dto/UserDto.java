@@ -1,7 +1,14 @@
 package com.project.cafe.dto;
 
-import org.hibernate.validator.constraints.Length;
 
+
+
+
+import com.project.cafe.enums.Role;
+import com.project.cafe.enums.Status;
+
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -39,10 +46,11 @@ public class UserDto {
 	@Size(min = 8 , message = "password must be greater than 8")
 	private String password;
 	
-	
-	private String status;
-	
-	private String role;
+	@Enumerated(EnumType.STRING)
+	private Status status;
+
+	@Enumerated(EnumType.STRING)
+	private Role role;
 	
 
 }

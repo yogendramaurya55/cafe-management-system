@@ -1,18 +1,26 @@
 package com.project.cafe.entity;
 
+
 import java.io.Serializable;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import com.project.cafe.enums.Role;
+import com.project.cafe.enums.Status;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
@@ -20,6 +28,8 @@ import lombok.Data;
 @DynamicUpdate
 @Table(name = "user")
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -41,9 +51,11 @@ public class User implements Serializable {
 	private String password;
 	
 	@Column(name = "status")
-	private String status;
+	@Enumerated(EnumType.STRING)
+	private Status status;
 	
 	@Column(name = "role")
-	private String role;
+	@Enumerated(EnumType.STRING)
+	private Role role;
 
 }
