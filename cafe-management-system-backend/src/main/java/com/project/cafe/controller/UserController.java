@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.cafe.constants.CafeContants;
 import com.project.cafe.dto.LoginDto;
 import com.project.cafe.dto.UserDto;
 import com.project.cafe.serviceImpl.UserServiceImpl;
@@ -24,34 +25,39 @@ public class UserController {
 
 	private final UserServiceImpl userService;
 
-	
 	@PostMapping("/signup")
-	public ResponseEntity<String> signUp(
-			@Valid @RequestBody UserDto reqDto) throws Exception{
-		
-			return userService.signUp(reqDto);
-		
+	public ResponseEntity<String> signUp(@Valid @RequestBody UserDto reqDto) throws Exception {
+
+		return userService.signUp(reqDto);
+
 	}
-	
+
 	@PostMapping("/login")
-	public ResponseEntity<String> login(
-			@Valid @RequestBody LoginDto reqDto 
-			)throws Exception{
-		
+	public ResponseEntity<String> login(@Valid @RequestBody LoginDto reqDto) throws Exception {
+
 		return userService.login(reqDto);
 	}
-	
+
 	@GetMapping("/get")
-	public ResponseEntity<List<UserDto>> getAllUser() throws Exception{
+	public ResponseEntity<List<UserDto>> getAllUser() throws Exception {
 		return userService.getAllUsers();
 	}
-	
+
 	@PostMapping(path = "/update")
-	public ResponseEntity<String> update(
-			@RequestBody Map<String, String> requestMap
-			)
-	{
+	public ResponseEntity<String> update(@RequestBody Map<String, String> requestMap) throws Exception {
 		return userService.update(requestMap);
+	}
+
+	@GetMapping("/checkToken")
+	public ResponseEntity<String> checkToken() throws Exception {
+
+		return userService.cehckToken();
+
+	}
+
+	@PostMapping("/changePassword")
+	public ResponseEntity<String> changePassword(@RequestBody Map<String, String> requestMap) throws Exception {
+		return userService.changePassword(requestMap);
 	}
 
 }

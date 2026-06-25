@@ -13,5 +13,7 @@ public interface UserService {
 	ResponseEntity<String> signUp(UserDto reqDto) throws Exception;
 	public ResponseEntity<String> login( LoginDto reqDto) throws Exception;
 	public ResponseEntity<List<UserDto>> getAllUsers() throws Exception;
-	public ResponseEntity<String> update(Map<String, String> requestMap);
+	public ResponseEntity<String> update(Map<String, String> requestMap) throws Exception;
+	public ResponseEntity<String> cehckToken() throws Exception;
+	public ResponseEntity<String> changePassword(Map<String, String> requestMap) throws Exception;
 }

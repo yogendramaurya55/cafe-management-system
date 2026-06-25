@@ -1,5 +1,6 @@
 package com.project.cafe.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -32,5 +33,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 			"""
 			)
 	Integer updateStatus(@Param("status") Status status , @Param("id") String id);
+	
+	@Query("""
+			SELECT u.email
+			FROM User u 
+			WHERE u.role = 'ADMIN'
+			""")
+	Optional<List<String>> getAllAdmin();
 	
 }
