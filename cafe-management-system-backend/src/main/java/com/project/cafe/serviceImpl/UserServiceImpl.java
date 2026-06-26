@@ -1,9 +1,11 @@
 package com.project.cafe.serviceImpl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +20,11 @@ import com.project.cafe.JWT.JwtFilter;
 import com.project.cafe.JWT.JwtUtils;
 import com.project.cafe.constants.CafeContants;
 import com.project.cafe.dto.LoginDto;
+import com.project.cafe.dto.OtpDetailsDto;
+import com.project.cafe.dto.ResetPasswordRequest;
 import com.project.cafe.dto.UserDto;
+import com.project.cafe.dto.VerifyOtpRequest;
+import com.project.cafe.dto.forgetPasswordDto;
 import com.project.cafe.entity.User;
 import com.project.cafe.enums.Status;
 import com.project.cafe.exception.ResourceNotFound;
@@ -28,6 +34,7 @@ import com.project.cafe.service.UserService;
 import com.project.cafe.utils.CafeUtils;
 import com.project.cafe.utils.EmailUtils;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,6 +49,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
+	private final Map<String, OtpDetailsDto> otpStore = new ConcurrentHashMap<>();
 
 	private final JwtFilter jwtFilter;
 	private final UserRepository userRepo;
@@ -183,11 +192,73 @@ public class UserServiceImpl implements UserService {
 
 			user.setPassword(passwordEncoder.encode(requestMap.get("newPassword")));
 			userRepo.save(user);
-			
+
 			return CafeUtils.getResponseEntity("Password changed successfully", HttpStatus.OK);
 		}
 
-		return CafeUtils.getResponseEntity(CafeContants.SOMETHING_WENT_WRONG, HttpStatus.BAD_REQUEST);
+		return CafeUtils.getResponseEntity("Incorrect old password", HttpStatus.BAD_REQUEST);
+	}
+
+	@Override
+	public ResponseEntity<String> forgetPassword(forgetPasswordDto reqDto) {
+
+		User dbUser = userRepo.findByEmail(reqDto.getEmail()).orElseThrow(() -> new ResourceNotFound("no user found"));
+
+		OtpDetailsDto otpDetails = CafeUtils.generateOtp();
+
+		otpStore.put(reqDto.getEmail(), otpDetails);
+
+		String subject = "One Time Password ";
+		String body = "use this otp to reset password : " + otpDetails.getOtp() + "\n Valid for 5 minutes";
+		String to = reqDto.getEmail();
+
+		emailUtils.sendSimpleMessage(to, subject, body, null);
+
+		return CafeUtils.getResponseEntity("Email sent successfully", HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<String> verifyOtp(VerifyOtpRequest verifyReq) {
+
+		User dbUser = userRepo.findByEmail(verifyReq.getEmail())
+				.orElseThrow(() -> new ResourceNotFound("user not found"));
+
+		if (!otpStore.containsKey(verifyReq.getEmail())) {
+			return CafeUtils.getResponseEntity("otp not generated yet", HttpStatus.BAD_REQUEST);
+		}
+
+		if (otpStore.get(verifyReq.getEmail()).getOtp().equals(verifyReq.getOtp())
+				&& otpStore.get(verifyReq.getEmail()).getExpiryTime().isAfter(LocalDateTime.now())) {
+			OtpDetailsDto otpDetails = otpStore.get(verifyReq.getEmail());
+			otpDetails.setVerified(true);
+			otpStore.put(verifyReq.getEmail(), otpDetails);
+			return CafeUtils.getResponseEntity("Otp verifed successfully", HttpStatus.OK);
+		}
+
+		return CafeUtils.getResponseEntity("Invalid otp", HttpStatus.BAD_GATEWAY);
+	}
+
+	@Override
+	public ResponseEntity<String> resetPassword(ResetPasswordRequest resetPasswordReq) {
+
+		User dbUser = userRepo.findByEmail(resetPasswordReq.getEmail())
+				.orElseThrow(() -> new ResourceNotFound("user not found"));
+
+		if (!otpStore.containsKey(resetPasswordReq.getEmail())) {
+			return CafeUtils.getResponseEntity("generate the otp first", HttpStatus.BAD_REQUEST);
+		}
+
+		if (!otpStore.get(resetPasswordReq.getEmail()).isVerified()) {
+			return CafeUtils.getResponseEntity("otp is not verified", HttpStatus.BAD_REQUEST);
+		}
+
+		dbUser.setPassword(passwordEncoder.encode(resetPasswordReq.getNewPassword()));
+
+		userRepo.save(dbUser);
+		
+		otpStore.remove(resetPasswordReq.getEmail());
+
+		return CafeUtils.getResponseEntity("Password updated successfully", HttpStatus.OK);
 	}
 
 }

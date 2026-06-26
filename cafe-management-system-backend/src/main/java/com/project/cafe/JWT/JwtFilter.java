@@ -37,7 +37,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		if (path.equals("/user/login")
 		        || path.equals("/user/signup")
-		        || path.equals("/user/forgotPassword")) {
+		        || path.equals("/user/forgotPassword")
+		        || path.equals("/user/verify-otp")
+		        || path.equals("/user/reset-password")
+				) {
 
 		    filterChain.doFilter(httpServletrequest, httpServletresponse);
 		    return;

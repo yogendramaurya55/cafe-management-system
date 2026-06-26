@@ -72,7 +72,10 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/user/login",
                     "/user/signup",
-                    "/user/forgotPassword"
+                    "/user/forgotPassword",
+                    "/user/forgetPassword",
+                    "/user/verify-otp",
+                    "/user/reset-password"
                 ).permitAll()
                 .anyRequest().authenticated()
             );
